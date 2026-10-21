@@ -1,4 +1,4 @@
-import { defaultState, newId } from "./data.js";
+import { SPECIAL, defaultState, newId } from "./data.js";
 
 const upd = (list, id, patch) => list.map((x) => (x.id === id ? { ...x, ...patch } : x));
 
@@ -14,6 +14,18 @@ export function reducer(s, a) {
       };
     case "resetAll":
       return defaultState();
+
+    // Dropdown-Auswahl: "Fehlt", "Nicht bearbeitet", "Anwesend" oder ein Thema
+    case "setValue": {
+      const v = a.value;
+      const patch =
+        v === "Fehlt"
+          ? { status: "fehlt", thema: null }
+          : SPECIAL.includes(v)
+            ? { status: "anwesend", thema: null, marker: v }
+            : { status: "anwesend", thema: v };
+      return { ...s, [a.list]: upd(s[a.list], a.id, patch) };
+    }
 
     case "fk":
       return { ...s, fks: upd(s.fks, a.id, a.patch) };

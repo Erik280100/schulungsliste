@@ -54,16 +54,13 @@ export default function TopicCards({ state, dispatch }) {
   const placed = state.trainees.filter((t) => t.status === "anwesend" && t.thema);
   return (
     <div className="grid">
-      {state.themen.map((th) => (
-        <TopicCard
-          key={th}
-          thema={th}
-          leaders={fkHere.filter((f) => f.thema === th)}
-          list={placed.filter((t) => t.thema === th)}
-          state={state}
-          dispatch={dispatch}
-        />
-      ))}
+      {state.themen.map((th) => {
+        const leaders = fkHere.filter((f) => f.thema === th);
+        const list = placed.filter((t) => t.thema === th);
+        // Themen ohne Führungskraft und ohne Trainees blenden wir aus
+        if (!leaders.length && !list.length) return null;
+        return <TopicCard key={th} thema={th} leaders={leaders} list={list} state={state} dispatch={dispatch} />;
+      })}
     </div>
   );
 }

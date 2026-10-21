@@ -1,5 +1,11 @@
-export const STORAGE_KEY = "schulung-v3";
-export const COLORS = ["#2456d6", "#0f9d74", "#d9822b", "#8e44ad", "#c0392b", "#16a2b8", "#7f8c00"];
+export const STORAGE_KEY = "schulung-v4";
+export const COLORS = [
+  "#2456d6", "#0f9d74", "#d9822b", "#8e44ad", "#c0392b", "#16a2b8", "#7f8c00",
+  "#d6336c", "#5f6b7a", "#3b82f6", "#a0522d", "#2f9e44", "#e8590c",
+];
+
+// Zustände, die keine Themen-Karte haben (stehen im Dropdown ganz oben)
+export const SPECIAL = ["Fehlt", "Nicht bearbeitet", "Anwesend"];
 
 const V = "Verkauf Produkte";
 const E = "Empfehlungen Kunden / Partner";
@@ -7,11 +13,15 @@ const M = "Maklervorbereitung";
 const TE = "Telefonieren";
 const A = "Analyse neu";
 const BP = "Analyse Big Points";
+const THEMEN = [
+  BP, M, "Produktschulung", TE, A, "Beratung Ablauf", V, "Telefonparty + Monatsplanung",
+  "FK to be / Training", E, "Keynote + Hot Chair", "Finanzierung", "FK Training",
+];
 const F = "__fehlt";
 const NB = "__nicht_bearbeitet";
 
 export function defaultState() {
-  const fk = (name, thema, status = "anwesend") => ({ name, thema, status });
+  const fk = (name, thema, status = "anwesend", marker = null) => ({ name, thema, status, marker });
   const tr = (name, gruppe, thema) => ({
     name,
     gruppe,
@@ -19,14 +29,14 @@ export function defaultState() {
     status: thema === F ? "fehlt" : "anwesend",
   });
   return {
-    themen: [TE, V, E, M, A, BP],
+    themen: THEMEN,
     fks: [
       fk("Shahir A.", null, "fehlt"), fk("Amel B.", null, "fehlt"), fk("Samuel B.", E),
       fk("Erik B.", M), fk("Filip B.", V), fk("Tobias B.", TE), fk("Sedin C.", A),
       fk("Sandro F.", M), fk("Hamza H.", TE), fk("Elias K.", M), fk("Georg K.", null),
       fk("Christian L.", null, "fehlt"), fk("Marco M.", null, "fehlt"), fk("Aldin M.", E),
       fk("Leonhard O.", M), fk("Michael P.", M), fk("Philipp R.", null), fk("Marko R.", null, "fehlt"),
-      fk("David S.", null, "fehlt"), fk("Walid S.", null), fk("Philipp S.", M), fk("Admir S.", null),
+      fk("David S.", null, "fehlt"), fk("Walid S.", null, "anwesend", "Nicht bearbeitet"), fk("Philipp S.", M), fk("Admir S.", null),
       fk("Lukas S.", null), fk("Noah V.", M),
     ].map((f, i) => ({ id: "f" + i, ...f })),
     // Gruppen wie im bisherigen Tool: [Gruppenleiter, [[Trainee, Thema], ...]]

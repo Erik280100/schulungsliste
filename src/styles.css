@@ -173,8 +173,15 @@ summary { cursor: pointer; font-weight: 700; }
   h1 { font-size: 22px; }
   .row input[type=text] { width: 100%; }
 }
+/* Druck: nur die Themen-Karten (Telefonieren, Verkauf, ...) */
 @media print {
-  header .toolbar, details, .fk-bar, .tr select { display: none; }
+  header.top, h2, .fk-bar, .pool, details, .tr select { display: none !important; }
   body { background: #fff; }
-  .card, .stat { box-shadow: none; }
+  main { padding: 0; max-width: none; }
+  .grid { grid-template-columns: repeat(2, 1fr); gap: 12px; align-items: start; }
+  .card { box-shadow: none; break-inside: avoid; border-color: #bbb; }
+  .card::after { display: none; }
+  .tr { margin-bottom: 4px; padding: 6px 10px; break-inside: avoid; }
+  .warn { display: none; }
+  * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 }

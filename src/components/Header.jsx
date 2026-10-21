@@ -1,4 +1,5 @@
 import { useRef } from "react";
+import { exportExcel } from "../exportExcel.js";
 
 export default function Header({ state, dispatch }) {
   const fileRef = useRef(null);
@@ -38,12 +39,7 @@ export default function Header({ state, dispatch }) {
 
   return (
     <header className="top">
-      <div>
-        <h1>Schulungs-Einteilung</h1>
-        <div className="muted">
-          {new Date().toLocaleDateString("de-AT", { weekday: "long", day: "2-digit", month: "long", year: "numeric" })}
-        </div>
-      </div>
+      <h1>Schulungs-Einteilung</h1>
       <div className="stats">
         {stats.map(([n, l]) => (
           <div className="stat" key={l}>
@@ -53,6 +49,7 @@ export default function Header({ state, dispatch }) {
         ))}
       </div>
       <div className="toolbar">
+        <button onClick={() => exportExcel(state)}>Excel</button>
         <button onClick={exportJson}>Export</button>
         <button onClick={() => fileRef.current.click()}>Import</button>
         <button onClick={() => window.print()}>Drucken</button>

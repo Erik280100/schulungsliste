@@ -1,21 +1,26 @@
-import { COLORS } from "../data.js";
+import { COLORS, SPECIAL } from "../data.js";
 
 export const colorOf = (themen, thema) => {
   const i = themen.indexOf(thema);
   return i < 0 ? "var(--line)" : COLORS[i % COLORS.length];
 };
 
-export function ThemaSelect({ themen, value, onChange, disabled, short, title }) {
+// Was das Dropdown für eine Person anzeigt: Fehlt / Nicht bearbeitet / Anwesend / Thema
+export function valueOf(p, isFk) {
+  if (p.status === "fehlt") return "Fehlt";
+  if (p.thema) return p.thema;
+  return p.marker || (isFk ? "Anwesend" : "Nicht bearbeitet");
+}
+
+export function ThemaSelect({ themen, person, isFk, list, dispatch, short, title }) {
   return (
     <select
       className={short ? "short" : undefined}
-      value={value || ""}
-      disabled={disabled}
+      value={valueOf(person, isFk)}
       title={title}
-      onChange={(e) => onChange(e.target.value || null)}
+      onChange={(e) => dispatch({ type: "setValue", list, id: person.id, value: e.target.value })}
     >
-      <option value="">– kein Thema –</option>
-      {themen.map((t) => (
+      {[...SPECIAL, ...themen].map((t) => (
         <option key={t} value={t}>
           {t}
         </option>
@@ -55,13 +60,7 @@ export function TraineeChip({ t, themen, dispatch }) {
           <small>Gruppe {t.gruppe}</small>
         </span>
       </div>
-      <ThemaSelect
-        short
-        title="Thema ändern"
-        themen={themen}
-        value={t.thema}
-        onChange={(thema) => dispatch({ type: "tr", id: t.id, patch: { thema } })}
-      />
+      <ThemaSelect short title="Thema ändern" themen={themen} person={t} list="trainees" dispatch={dispatch} />
     </div>
   );
 }

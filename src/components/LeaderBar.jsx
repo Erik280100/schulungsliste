@@ -23,12 +23,7 @@ export default function LeaderBar({ state, dispatch }) {
               <Avatar name={f.name} color={f.thema ? colorOf(state.themen, f.thema) : "var(--muted)"} />
               <span className="name">{f.name}</span>
             </label>
-            <ThemaSelect
-              themen={state.themen}
-              value={f.thema}
-              disabled={off}
-              onChange={(thema) => dispatch({ type: "fk", id: f.id, patch: { thema } })}
-            />
+            <ThemaSelect themen={state.themen} person={f} isFk list="fks" dispatch={dispatch} />
           </div>
         );
       })}
