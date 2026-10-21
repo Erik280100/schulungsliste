@@ -1,9 +1,6 @@
 name: Build und Deploy
 
-# Bei jedem Push auf main wird gebaut (prüft, dass die App kompiliert).
-# Veröffentlicht auf GitHub Pages wird nur, wenn der Workflow von Hand gestartet wird
-# (Actions -> "Build und Deploy" -> Run workflow). Für automatisches Deploy bei jedem Push
-# beim Job "deploy" die Zeile "if: ..." entfernen.
+# Bei jedem Push auf main wird gebaut und auf GitHub Pages veröffentlicht.
 on:
   push:
     branches: [main]
@@ -33,7 +30,6 @@ jobs:
 
   deploy:
     needs: build
-    if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     permissions:
       pages: write
