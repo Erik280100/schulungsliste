@@ -2,7 +2,7 @@ import { useRef, useState } from "react";
 import ConfirmDialog from "./ConfirmDialog.jsx";
 import { exportExcel } from "../exportExcel.js";
 
-export default function Header({ state, dispatch }) {
+export default function Header({ state, dispatch, onFinish }) {
   const fileRef = useRef(null);
   const [askReset, setAskReset] = useState(false);
   const here = state.trainees.filter((t) => t.status === "anwesend");
@@ -52,6 +52,9 @@ export default function Header({ state, dispatch }) {
         ))}
       </div>
       <div className="toolbar">
+        <button className="primary" onClick={onFinish}>
+          Planung abschließen
+        </button>
         <button onClick={() => exportExcel(state)}>Excel</button>
         <button onClick={exportJson}>Export</button>
         <button onClick={() => fileRef.current.click()}>Import</button>

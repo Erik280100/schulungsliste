@@ -1,8 +1,8 @@
 import { Avatar, ThemaSelect, colorOf, unledTrainees } from "./common.jsx";
 
 // Schritt 2: Jeder Trainee bekommt in seiner Gruppe ein Thema (oder Fehlt / Nicht bearbeitet / Anwesend)
-export default function TraineeGroups({ state, dispatch }) {
-  const unled = new Set(unledTrainees(state).map((t) => t.id));
+export default function TraineeGroups({ state, dispatch, checked }) {
+  const unled = new Set((checked ? unledTrainees(state) : []).map((t) => t.id));
   const gruppen = [...new Set(state.trainees.map((t) => t.gruppe))];
   return (
     <div className="groups">

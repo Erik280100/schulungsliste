@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { TraineeChip, colorOf } from "./common.jsx";
 
-function TopicCard({ thema, leaders, list, state, dispatch }) {
+function TopicCard({ thema, leaders, list, state, dispatch, checked }) {
   const [over, setOver] = useState(false);
   const sorted = [...list].sort((a, b) => a.gruppe.localeCompare(b.gruppe));
   const drop = (e) => {
@@ -41,7 +41,7 @@ function TopicCard({ thema, leaders, list, state, dispatch }) {
         <div className="warn">Keine anwesende Führungskraft für dieses Thema!</div>
       )}
       {sorted.length ? (
-        sorted.map((t) => <TraineeChip key={t.id} t={t} themen={state.themen} alert={!leaders.length} />)
+        sorted.map((t) => <TraineeChip key={t.id} t={t} themen={state.themen} alert={checked && !leaders.length} />)
       ) : (
         <div className="empty">Niemand zugeordnet</div>
       )}
@@ -49,7 +49,7 @@ function TopicCard({ thema, leaders, list, state, dispatch }) {
   );
 }
 
-export default function TopicCards({ state, dispatch }) {
+export default function TopicCards({ state, dispatch, checked }) {
   const fkHere = state.fks.filter((f) => f.status === "anwesend");
   const placed = state.trainees.filter((t) => t.status === "anwesend" && t.thema);
   // Themen ohne Führungskraft und ohne Trainees blenden wir aus
@@ -63,7 +63,15 @@ export default function TopicCards({ state, dispatch }) {
     .map((c) => ({ ...c, weight: 3 + c.list.length + (c.leaders.length > 3 ? 1 : 0) }));
 
   const render = ({ th, leaders, list }) => (
-    <TopicCard key={th} thema={th} leaders={leaders} list={list} state={state} dispatch={dispatch} />
+    <TopicCard
+      key={th}
+      thema={th}
+      leaders={leaders}
+      list={list}
+      state={state}
+      dispatch={dispatch}
+      checked={checked}
+    />
   );
 
   // Druck: die größte Karte zuerst, jede in die bisher kürzeste der 3 Spalten -> gleichmäßig gefüllte Seite

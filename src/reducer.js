@@ -9,8 +9,8 @@ export function reducer(s, a) {
     case "resetDay":
       return {
         ...s,
-        fks: s.fks.map((f) => ({ ...f, thema: null, status: "anwesend" })),
-        trainees: s.trainees.map((t) => ({ ...t, thema: null, status: "anwesend" })),
+        fks: s.fks.map((f) => ({ ...f, thema: null, status: "anwesend", marker: "Nicht bearbeitet" })),
+        trainees: s.trainees.map((t) => ({ ...t, thema: null, status: "anwesend", marker: "Nicht bearbeitet" })),
       };
     case "resetAll":
       return defaultState();
