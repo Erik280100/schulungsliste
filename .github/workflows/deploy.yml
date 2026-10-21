@@ -1,26 +1,24 @@
-name: Deploy auf GitHub Pages
+name: Build und Deploy
 
-# Wird bewusst nur von Hand gestartet (Actions -> "Deploy auf GitHub Pages" -> Run workflow),
-# damit nichts ungewollt veröffentlicht wird. Für automatisches Deploy bei jedem Push
-# einfach "push: branches: [main]" unter "on:" ergänzen.
+# Bei jedem Push auf main wird gebaut (prüft, dass die App kompiliert).
+# Veröffentlicht auf GitHub Pages wird nur, wenn der Workflow von Hand gestartet wird
+# (Actions -> "Build und Deploy" -> Run workflow). Für automatisches Deploy bei jedem Push
+# beim Job "deploy" die Zeile "if: ..." entfernen.
 on:
+  push:
+    branches: [main]
   workflow_dispatch:
 
 permissions:
   contents: read
-  pages: write
-  id-token: write
 
 concurrency:
   group: pages
   cancel-in-progress: true
 
 jobs:
-  deploy:
+  build:
     runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -29,9 +27,20 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run build
-      - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist
+
+  deploy:
+    needs: build
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
       - id: deployment
         uses: actions/deploy-pages@v4
