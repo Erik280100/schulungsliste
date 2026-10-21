@@ -1,8 +1,10 @@
-import { useRef } from "react";
+import { useRef, useState } from "react";
+import ConfirmDialog from "./ConfirmDialog.jsx";
 import { exportExcel } from "../exportExcel.js";
 
 export default function Header({ state, dispatch }) {
   const fileRef = useRef(null);
+  const [askReset, setAskReset] = useState(false);
   const here = state.trainees.filter((t) => t.status === "anwesend");
   const placed = here.filter((t) => t.thema);
   const fkHere = state.fks.filter((f) => f.status === "anwesend");
@@ -34,7 +36,8 @@ export default function Header({ state, dispatch }) {
   };
 
   const resetDay = () => {
-    if (confirm("Alle Themen-Zuordnungen und Anwesenheiten zurücksetzen?")) dispatch({ type: "resetDay" });
+    setAskReset(false);
+    dispatch({ type: "resetDay" });
   };
 
   return (
@@ -53,9 +56,19 @@ export default function Header({ state, dispatch }) {
         <button onClick={exportJson}>Export</button>
         <button onClick={() => fileRef.current.click()}>Import</button>
         <button onClick={() => window.print()}>Drucken</button>
-        <button onClick={resetDay}>Tag zurücksetzen</button>
+        <button onClick={() => setAskReset(true)}>Tag zurücksetzen</button>
         <input ref={fileRef} type="file" accept="application/json" hidden onChange={importJson} />
       </div>
+      {askReset && (
+        <ConfirmDialog
+          title="Alle Daten zurücksetzen?"
+          confirmLabel="Ja, zurücksetzen"
+          onConfirm={resetDay}
+          onCancel={() => setAskReset(false)}
+        >
+          Möchten Sie wirklich alle Daten zurücksetzen? Alle Themen-Zuordnungen und Anwesenheiten gehen verloren.
+        </ConfirmDialog>
+      )}
     </header>
   );
 }
