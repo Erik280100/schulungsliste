@@ -108,8 +108,11 @@ input[type=checkbox] { accent-color: var(--accent); width: 16px; height: 16px; }
 .fk label .name { flex: 1; }
 
 /* Themen-Karten */
-.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; align-items: start; }
+.print-cols { display: none; }
+/* Masonry: Karten dürfen unterschiedlich hoch sein und rücken lückenlos auf */
+.grid { column-width: 300px; column-gap: 16px; }
 .card {
+  display: inline-block; width: 100%; margin-bottom: 16px; break-inside: avoid;
   background: var(--surface); border: 1px solid var(--line); border-radius: 20px;
   padding: 16px; min-height: 140px; box-shadow: var(--shadow); position: relative; overflow: hidden;
   transition: transform .15s, box-shadow .15s;
@@ -194,8 +197,9 @@ summary { cursor: pointer; font-weight: 700; }
   header.top, h2, .fk-bar, .groups, .pool, details { display: none !important; }
   body { background: #fff; font-size: 11px; }
   main { padding: 0; max-width: none; }
-  .grid { grid-template-columns: repeat(3, 1fr); gap: 8px; align-items: start; }
-  .card { padding: 10px; min-height: 0; }
+  .grid { display: none; }
+  .print-cols { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; align-items: start; }
+  .card { padding: 10px; min-height: 0; margin-bottom: 8px; }
   .avatar { width: 24px; height: 24px; font-size: 9px; }
   .card { box-shadow: none; break-inside: avoid; border-color: #bbb; }
   .card::after { display: none; }
