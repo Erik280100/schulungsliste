@@ -158,10 +158,12 @@ input[type=checkbox] { accent-color: var(--accent); width: 16px; height: 16px; }
 .x { color: var(--danger); font-weight: 600; }
 
 /* Schritt 2: Trainees nach Gruppen */
-.groups { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 12px; align-items: start; }
+/* Masonry: Spalten füllen sich nacheinander, Kacheln dürfen unterschiedlich hoch sein */
+.groups { column-width: 340px; column-gap: 12px; }
 .gcard {
   background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius);
   padding: 12px 14px; box-shadow: var(--shadow);
+  break-inside: avoid; margin-bottom: 12px; display: inline-block; width: 100%;
 }
 .gcard h3 { margin: 0 0 8px; font-size: 13.5px; font-weight: 700; display: flex; justify-content: space-between; gap: 8px; }
 .gcount { color: var(--muted); font-weight: 600; font-size: 12px; }
@@ -187,14 +189,18 @@ summary { cursor: pointer; font-weight: 700; }
   .row input[type=text] { width: 100%; }
 }
 /* Druck: nur die Themen-Karten (Telefonieren, Verkauf, ...) */
+@page { size: A4 landscape; margin: 8mm; }
 @media print {
   header.top, h2, .fk-bar, .groups, .pool, details { display: none !important; }
-  body { background: #fff; }
+  body { background: #fff; font-size: 11px; }
   main { padding: 0; max-width: none; }
-  .grid { grid-template-columns: repeat(2, 1fr); gap: 12px; align-items: start; }
+  .grid { grid-template-columns: repeat(3, 1fr); gap: 8px; align-items: start; }
+  .card { padding: 10px; min-height: 0; }
+  .avatar { width: 24px; height: 24px; font-size: 9px; }
   .card { box-shadow: none; break-inside: avoid; border-color: #bbb; }
   .card::after { display: none; }
-  .tr { margin-bottom: 4px; padding: 6px 10px; break-inside: avoid; }
+  .tr { margin-bottom: 3px; padding: 4px 8px; break-inside: avoid; }
+  .tr small { font-size: 9.5px; }
   .warn { display: none; }
   * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 }

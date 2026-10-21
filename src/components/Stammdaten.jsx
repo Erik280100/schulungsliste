@@ -53,13 +53,6 @@ export default function Stammdaten({ state, dispatch }) {
             .map((t) => (
               <div className="row" key={t.id}>
                 <NameInput value={t.name} onCommit={(name) => dispatch({ type: "tr", id: t.id, patch: { name } })} />
-                <select
-                  value={t.status}
-                  onChange={(e) => dispatch({ type: "tr", id: t.id, patch: { status: e.target.value } })}
-                >
-                  <option value="anwesend">Anwesend</option>
-                  <option value="fehlt">Fehlt</option>
-                </select>
                 <button onClick={() => dispatch({ type: "trDel", id: t.id })}>Entfernen</button>
               </div>
             ))}
