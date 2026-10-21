@@ -29,7 +29,13 @@ export function ThemaSelect({ themen, person, isFk, list, dispatch, short, title
   );
 }
 
-export const initials = (name) =>
+// Anwesende Trainees, deren Thema keine anwesende Führungskraft hat -> nicht wirklich zugeteilt
+export const unledTrainees = (state) => {
+  const led = new Set(state.fks.filter((f) => f.status === "anwesend" && f.thema).map((f) => f.thema));
+  return state.trainees.filter((t) => t.status === "anwesend" && t.thema && !led.has(t.thema));
+};
+
+export const initials =(name) =>
   name
     .split(/[\s-]+/)
     .filter(Boolean)
@@ -46,10 +52,10 @@ export function Avatar({ name, color }) {
 }
 
 // Ergebnis-Ansicht: nur anzeigen (Zuteilung passiert oben in Schritt 2), aber per Drag & Drop verschiebbar
-export function TraineeChip({ t, themen }) {
+export function TraineeChip({ t, themen, alert }) {
   return (
     <div
-      className="tr"
+      className={"tr" + (alert ? " alert" : "")}
       style={{ "--c": colorOf(themen, t.thema) }}
       draggable
       onDragStart={(e) => e.dataTransfer.setData("text/plain", t.id)}

@@ -7,13 +7,21 @@ import TopicCards from "./components/TopicCards.jsx";
 import TraineeGroups from "./components/TraineeGroups.jsx";
 import { Absent, Unassigned } from "./components/Pools.jsx";
 import Stammdaten from "./components/Stammdaten.jsx";
+import { unledTrainees } from "./components/common.jsx";
 
 export default function App() {
   const [state, dispatch] = useReducer(reducer, undefined, loadState);
   useEffect(() => saveState(state), [state]);
+  const unled = unledTrainees(state);
 
   return (
     <main>
+      {unled.length > 0 && (
+        <div className="attention" role="alert">
+          <b>Achtung:</b> Nicht alle Trainees sind zugeteilt – für ihr Thema ist keine Führungskraft eingeteilt:{" "}
+          {unled.map((t) => `${t.name} (${t.thema})`).join(", ")}
+        </div>
+      )}
       <Header state={state} dispatch={dispatch} />
 
       <h2>1 · Führungskräfte: Thema zuteilen</h2>

@@ -41,7 +41,7 @@ function TopicCard({ thema, leaders, list, state, dispatch }) {
         <div className="warn">Keine anwesende Führungskraft für dieses Thema!</div>
       )}
       {sorted.length ? (
-        sorted.map((t) => <TraineeChip key={t.id} t={t} themen={state.themen} />)
+        sorted.map((t) => <TraineeChip key={t.id} t={t} themen={state.themen} alert={!leaders.length} />)
       ) : (
         <div className="empty">Niemand zugeordnet</div>
       )}
