@@ -1,11 +1,11 @@
 import { TraineeChip } from "./common.jsx";
 
-export function Unassigned({ state, dispatch }) {
+export function Unassigned({ state }) {
   const open = state.trainees.filter((t) => t.status === "anwesend" && !t.thema);
   return (
     <div className={"pool" + (open.length ? " chips" : "")}>
       {open.length ? (
-        open.map((t) => <TraineeChip key={t.id} t={t} themen={state.themen} dispatch={dispatch} />)
+        open.map((t) => <TraineeChip key={t.id} t={t} themen={state.themen} />)
       ) : (
         <span className="empty">Alle anwesenden Trainees sind eingeteilt.</span>
       )}

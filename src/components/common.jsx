@@ -45,7 +45,8 @@ export function Avatar({ name, color }) {
   );
 }
 
-export function TraineeChip({ t, themen, dispatch }) {
+// Ergebnis-Ansicht: nur anzeigen (Zuteilung passiert oben in Schritt 2), aber per Drag & Drop verschiebbar
+export function TraineeChip({ t, themen }) {
   return (
     <div
       className="tr"
@@ -60,7 +61,6 @@ export function TraineeChip({ t, themen, dispatch }) {
           <small>Gruppe {t.gruppe}</small>
         </span>
       </div>
-      <ThemaSelect short title="Thema ändern" themen={themen} person={t} list="trainees" dispatch={dispatch} />
     </div>
   );
 }
