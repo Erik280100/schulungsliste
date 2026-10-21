@@ -12,7 +12,7 @@ export default function LeaderBar({ state, dispatch }) {
             className={"fk" + (off ? " off" : "")}
             style={{ "--c": f.thema ? colorOf(state.themen, f.thema) : "var(--line)" }}
           >
-            <label>
+            <div className="fk-head">
               <input
                 type="checkbox"
                 checked={!off}
@@ -22,7 +22,7 @@ export default function LeaderBar({ state, dispatch }) {
               />
               <Avatar name={f.name} color={f.thema ? colorOf(state.themen, f.thema) : "var(--muted)"} />
               <span className="name">{f.name}</span>
-            </label>
+            </div>
             <ThemaSelect themen={state.themen} person={f} isFk list="fks" dispatch={dispatch} />
           </div>
         );
