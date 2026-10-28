@@ -20,6 +20,15 @@ const THEMEN = [
 const F = "__fehlt";
 const NB = "__nicht_bearbeitet";
 
+// Schlüssel für das Raum-Feld einer Karte: Thema, Teilgruppe (Thema|FK-Id) oder FK-Training (FK|Thema)
+export const raumKey = (thema, fkId) => (fkId ? `${thema}|${fkId}` : thema);
+export const fkRaumKey = (thema) => `FK|${thema}`;
+
+// ältere Speicherstände/Importe um neue Felder ergänzen
+export function normalize(s) {
+  return { ...s, split: s.split || {}, raeume: s.raeume || {} };
+}
+
 export function defaultState() {
   const fk = (name, thema, status = "anwesend", marker = null) => ({ name, thema, status, marker });
   const tr = (name, gruppe, thema) => ({
@@ -29,6 +38,8 @@ export function defaultState() {
     status: thema === F ? "fehlt" : "anwesend",
   });
   return {
+    split: {},
+    raeume: {},
     themen: THEMEN,
     fks: [
       fk("Shahir A.", null, "fehlt"), fk("Amel B.", null, "fehlt"), fk("Samuel B.", E),
@@ -73,7 +84,7 @@ export function defaultState() {
 export function loadState() {
   try {
     const s = JSON.parse(localStorage.getItem(STORAGE_KEY));
-    if (s && s.themen && s.fks && s.trainees) return s;
+    if (s && s.themen && s.fks && s.trainees) return normalize(s);
   } catch {
     /* kein Zugriff auf localStorage: Standarddaten */
   }

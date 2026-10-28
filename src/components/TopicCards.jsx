@@ -1,28 +1,42 @@
 import { useState } from "react";
-import { TraineeChip, colorOf } from "./common.jsx";
+import { FkChip, NameInput, TraineeChip, buildCards, colorOf } from "./common.jsx";
 
-function TopicCard({ thema, leaders, list, state, dispatch, checked }) {
+function TopicCard({ card, state, dispatch, checked }) {
+  const { kind, thema, leaders, list, fkId, teil, raumKey } = card;
   const [over, setOver] = useState(false);
-  const sorted = [...list].sort((a, b) => a.gruppe.localeCompare(b.gruppe));
+  const isFk = kind === "fk";
+  const sorted = isFk ? list : [...list].sort((a, b) => a.gruppe.localeCompare(b.gruppe));
   const drop = (e) => {
     e.preventDefault();
     setOver(false);
     const id = e.dataTransfer.getData("text/plain");
-    if (state.trainees.some((t) => t.id === id)) dispatch({ type: "tr", id, patch: { thema } });
+    // in einer Teilgruppe landet der Trainee bei deren Trainer, sonst ohne Teilgruppe
+    if (!isFk && state.trainees.some((t) => t.id === id)) {
+      dispatch({ type: "tr", id, patch: { thema, fkId: fkId || null } });
+    }
   };
   return (
     <div
       className={"card" + (over ? " over" : "")}
       style={{ "--c": colorOf(state.themen, thema) }}
-      onDragOver={(e) => {
-        e.preventDefault();
-        setOver(true);
-      }}
+      onDragOver={
+        isFk
+          ? undefined
+          : (e) => {
+              e.preventDefault();
+              setOver(true);
+            }
+      }
       onDragLeave={() => setOver(false)}
       onDrop={drop}
     >
       <h3>
-        {thema} <span className="count">{list.length}</span>
+        <span>
+          {thema}
+          {teil && <small className="sub"> · Gruppe {teil}</small>}
+          {isFk && <small className="sub"> · Führungskräfte-Training</small>}
+        </span>
+        <span className="count">{list.length}</span>
       </h3>
       <div className="leaders">
         {leaders.length > 0 && (
@@ -37,11 +51,35 @@ function TopicCard({ thema, leaders, list, state, dispatch, checked }) {
           </>
         )}
       </div>
+      <label className="raum">
+        <span>Raum</span>
+        <NameInput
+          value={state.raeume[raumKey] || ""}
+          placeholder="Raum eintragen…"
+          onCommit={(value) => dispatch({ type: "raum", key: raumKey, value })}
+        />
+      </label>
+      {!isFk && !teil && leaders.length > 1 && (
+        <button className="split no-print" onClick={() => dispatch({ type: "split", thema })}>
+          Gruppe aufteilen ({leaders.length} Führungskräfte)
+        </button>
+      )}
+      {teil && (
+        <button className="split no-print" onClick={() => dispatch({ type: "unsplit", thema })}>
+          Gruppen zusammenführen
+        </button>
+      )}
       {!leaders.length && list.length > 0 && (
         <div className="warn">Keine anwesende Führungskraft für dieses Thema!</div>
       )}
       {sorted.length ? (
-        sorted.map((t) => <TraineeChip key={t.id} t={t} themen={state.themen} alert={checked && !leaders.length} />)
+        sorted.map((p) =>
+          isFk ? (
+            <FkChip key={p.id} f={p} themen={state.themen} alert={checked && !leaders.length} />
+          ) : (
+            <TraineeChip key={p.id} t={p} themen={state.themen} alert={checked && !leaders.length} />
+          ),
+        )
       ) : (
         <div className="empty">Niemand zugeordnet</div>
       )}
@@ -50,28 +88,14 @@ function TopicCard({ thema, leaders, list, state, dispatch, checked }) {
 }
 
 export default function TopicCards({ state, dispatch, checked }) {
-  const fkHere = state.fks.filter((f) => f.status === "anwesend");
-  const placed = state.trainees.filter((t) => t.status === "anwesend" && t.thema);
-  // Themen ohne Führungskraft und ohne Trainees blenden wir aus
-  const cards = state.themen
-    .map((th) => ({
-      th,
-      leaders: fkHere.filter((f) => f.thema === th),
-      list: placed.filter((t) => t.thema === th),
-    }))
-    .filter((c) => c.leaders.length || c.list.length)
-    .map((c) => ({ ...c, weight: 3 + c.list.length + (c.leaders.length > 3 ? 1 : 0) }));
+  // Themen ohne Führungskraft und ohne Trainees blenden wir aus (siehe buildCards)
+  const cards = buildCards(state).map((c) => ({
+    ...c,
+    weight: 3 + c.list.length + (c.leaders.length > 3 ? 1 : 0),
+  }));
 
-  const render = ({ th, leaders, list }) => (
-    <TopicCard
-      key={th}
-      thema={th}
-      leaders={leaders}
-      list={list}
-      state={state}
-      dispatch={dispatch}
-      checked={checked}
-    />
+  const render = (card) => (
+    <TopicCard key={card.raumKey} card={card} state={state} dispatch={dispatch} checked={checked} />
   );
 
   // Druck: die größte Karte zuerst, jede in die bisher kürzeste der 3 Spalten -> gleichmäßig gefüllte Seite

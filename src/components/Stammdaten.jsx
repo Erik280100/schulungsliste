@@ -1,15 +1,4 @@
-// Eingabefelder speichern erst beim Verlassen (onBlur), damit das Tippen nicht jedes Mal neu rendert.
-function NameInput({ value, onCommit }) {
-  return (
-    <input
-      type="text"
-      key={value}
-      defaultValue={value}
-      onBlur={(e) => e.target.value !== value && onCommit(e.target.value)}
-      onKeyDown={(e) => e.key === "Enter" && e.currentTarget.blur()}
-    />
-  );
-}
+import { NameInput } from "./common.jsx";
 
 export default function Stammdaten({ state, dispatch }) {
   const gruppen = [...new Set(state.trainees.map((t) => t.gruppe))];

@@ -1,6 +1,7 @@
 import { useRef, useState } from "react";
 import ConfirmDialog from "./ConfirmDialog.jsx";
 import { exportExcel } from "../exportExcel.js";
+import { normalize } from "../data.js";
 
 export default function Header({ state, dispatch, onFinish }) {
   const fileRef = useRef(null);
@@ -28,7 +29,7 @@ export default function Header({ state, dispatch, onFinish }) {
     try {
       const d = JSON.parse(await e.target.files[0].text());
       if (!d.themen || !d.fks || !d.trainees) throw new Error("ungültig");
-      dispatch({ type: "replace", state: d });
+      dispatch({ type: "replace", state: normalize(d) });
     } catch {
       alert("Datei ist keine gültige Schulungs-Datei.");
     }

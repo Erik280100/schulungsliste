@@ -9,7 +9,7 @@ export default function LeaderBar({ state, dispatch }) {
         return (
           <div
             key={f.id}
-            className={"fk" + (off ? " off" : "")}
+            className={"fk" + (off ? " off" : "") + (f.thema && f.rolle === "teilnehmer" ? " teil" : "")}
             style={{ "--c": f.thema ? colorOf(state.themen, f.thema) : "var(--line)" }}
           >
             <div className="fk-head">
@@ -24,6 +24,16 @@ export default function LeaderBar({ state, dispatch }) {
               <span className="name">{f.name}</span>
             </div>
             <ThemaSelect themen={state.themen} person={f} isFk list="fks" dispatch={dispatch} />
+            <select
+              className="short"
+              value={f.rolle === "teilnehmer" ? "teilnehmer" : "trainer"}
+              disabled={!f.thema}
+              title="Trainiert diese Führungskraft das Thema oder nimmt sie am Training teil?"
+              onChange={(e) => dispatch({ type: "fk", id: f.id, patch: { rolle: e.target.value } })}
+            >
+              <option value="trainer">trainiert</option>
+              <option value="teilnehmer">nimmt am Training teil</option>
+            </select>
           </div>
         );
       })}

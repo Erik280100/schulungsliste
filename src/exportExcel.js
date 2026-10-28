@@ -1,10 +1,22 @@
-import { colorOf } from "./components/common.jsx";
+import { buildCards, colorOf } from "./components/common.jsx";
 
-// Excel-Datei: Themen als Spaltenköpfe, eingeteilte Trainees als Zeilen, zentriertes X im jeweiligen Thema.
+// Excel-Datei: Themen als Spaltenköpfe, eingeteilte Trainees (und teilnehmende Führungskräfte) als Zeilen,
+// dazu Trainer und Raum, zentriertes X im jeweiligen Thema.
 export async function exportExcel(state) {
   const { default: ExcelJS } = await import("exceljs");
-  // nur Themen mit eingeteilten Trainees als Spalten
-  const themen = state.themen.filter((th) => state.trainees.some((t) => t.status === "anwesend" && t.thema === th));
+  const rows = buildCards(state)
+    .flatMap((c) =>
+      c.list.map((p) => ({
+        name: p.name,
+        gruppe: c.kind === "fk" ? "Führungskraft" : p.gruppe,
+        trainer: c.leaders.map((f) => f.name).join(", "),
+        raum: state.raeume[c.raumKey] || "",
+        thema: c.thema,
+      })),
+    )
+    .sort((a, b) => a.gruppe.localeCompare(b.gruppe) || a.name.localeCompare(b.name));
+  // nur Themen mit eingeteilten Personen als Spalten
+  const themen = state.themen.filter((th) => rows.some((r) => r.thema === th));
   const wb = new ExcelJS.Workbook();
   const ws = wb.addWorksheet("Einteilung", { views: [{ state: "frozen", xSplit: 2, ySplit: 1 }] });
 
@@ -14,38 +26,36 @@ export async function exportExcel(state) {
   ws.columns = [
     { header: "Trainee", width: 24 },
     { header: "Gruppe", width: 22 },
+    { header: "Trainer", width: 22 },
+    { header: "Raum", width: 14 },
     ...themen.map((t) => ({ header: t, width: Math.max(16, t.length + 4) })),
   ];
 
   const header = ws.getRow(1);
   header.height = 34;
   header.eachCell((cell, col) => {
-    const thema = themen[col - 3];
+    const thema = themen[col - 5];
     const argb = "FF" + (thema ? hex(colorOf(state.themen, thema)) : "1D2330");
     cell.font = { bold: true, color: { argb: "FFFFFFFF" } };
     cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb } };
-    cell.alignment = { vertical: "middle", horizontal: col < 3 ? "left" : "center", wrapText: true };
+    cell.alignment = { vertical: "middle", horizontal: col < 5 ? "left" : "center", wrapText: true };
     cell.border = allBorders;
   });
 
-  const rows = state.trainees
-    .filter((t) => t.status === "anwesend" && t.thema)
-    .sort((a, b) => a.gruppe.localeCompare(b.gruppe) || a.name.localeCompare(b.name));
-
   rows.forEach((t) => {
-    const row = ws.addRow([t.name, t.gruppe, ...themen.map((th) => (th === t.thema ? "X" : ""))]);
+    const row = ws.addRow([t.name, t.gruppe, t.trainer, t.raum, ...themen.map((th) => (th === t.thema ? "X" : ""))]);
     row.eachCell({ includeEmpty: true }, (cell, col) => {
       cell.border = allBorders;
-      cell.alignment = { vertical: "middle", horizontal: col < 3 ? "left" : "center" };
-      if (col >= 3 && cell.value === "X") cell.font = { bold: true };
+      cell.alignment = { vertical: "middle", horizontal: col < 5 ? "left" : "center" };
+      if (col >= 5 && cell.value === "X") cell.font = { bold: true };
     });
   });
 
-  const sum = ws.addRow(["Summe", "", ...themen.map((_, i) => ({ formula: `COUNTIF(${col(i + 3)}2:${col(i + 3)}${rows.length + 1},"X")` }))]);
+  const sum = ws.addRow(["Summe", "", "", "", ...themen.map((_, i) => ({ formula: `COUNTIF(${col(i + 5)}2:${col(i + 5)}${rows.length + 1},"X")` }))]);
   sum.eachCell({ includeEmpty: true }, (cell, c) => {
     cell.font = { bold: true };
     cell.border = allBorders;
-    cell.alignment = { horizontal: c < 3 ? "left" : "center" };
+    cell.alignment = { horizontal: c < 5 ? "left" : "center" };
     cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFF1F3F8" } };
   });
 
