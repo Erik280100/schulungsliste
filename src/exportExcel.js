@@ -6,9 +6,9 @@ export async function exportExcel(state) {
   const { default: ExcelJS } = await import("exceljs");
   const rows = buildCards(state)
     .flatMap((c) =>
-      c.list.map((p) => ({
+      [...c.list, ...(c.guests || [])].map((p) => ({
         name: p.name,
-        gruppe: c.kind === "fk" ? "Führungskraft" : p.gruppe,
+        gruppe: c.kind === "fk" || !p.gruppe ? "Führungskraft" : p.gruppe,
         trainer: c.leaders.map((f) => f.name).join(", "),
         raum: state.raeume[c.raumKey] || "",
         thema: c.thema,

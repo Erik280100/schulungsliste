@@ -3,6 +3,7 @@ import { FkChip, NameInput, TraineeChip, buildCards, colorOf } from "./common.js
 
 function TopicCard({ card, state, dispatch, checked }) {
   const { kind, thema, leaders, list, fkId, teil, raumKey } = card;
+  const guests = card.guests || [];
   const [over, setOver] = useState(false);
   const isFk = kind === "fk";
   const sorted = isFk ? list : [...list].sort((a, b) => a.gruppe.localeCompare(b.gruppe));
@@ -36,7 +37,7 @@ function TopicCard({ card, state, dispatch, checked }) {
           {teil && <small className="sub"> · Gruppe {teil}</small>}
           {isFk && <small className="sub"> · Führungskräfte-Training</small>}
         </span>
-        <span className="count">{list.length}</span>
+        <span className="count">{list.length + guests.length}</span>
       </h3>
       <div className="leaders">
         {leaders.length > 0 && (
@@ -72,14 +73,19 @@ function TopicCard({ card, state, dispatch, checked }) {
       {!leaders.length && list.length > 0 && (
         <div className="warn">Keine anwesende Führungskraft für dieses Thema!</div>
       )}
-      {sorted.length ? (
-        sorted.map((p) =>
-          isFk ? (
-            <FkChip key={p.id} f={p} themen={state.themen} alert={checked && !leaders.length} />
-          ) : (
-            <TraineeChip key={p.id} t={p} themen={state.themen} alert={checked && !leaders.length} />
-          ),
-        )
+      {sorted.length || guests.length ? (
+        <>
+          {sorted.map((p) =>
+            isFk ? (
+              <FkChip key={p.id} f={p} themen={state.themen} alert={checked && !leaders.length} />
+            ) : (
+              <TraineeChip key={p.id} t={p} themen={state.themen} alert={checked && !leaders.length} />
+            ),
+          )}
+          {guests.map((f) => (
+            <FkChip key={f.id} f={f} themen={state.themen} />
+          ))}
+        </>
       ) : (
         <div className="empty">Niemand zugeordnet</div>
       )}
@@ -91,7 +97,7 @@ export default function TopicCards({ state, dispatch, checked }) {
   // Themen ohne Führungskraft und ohne Trainees blenden wir aus (siehe buildCards)
   const cards = buildCards(state).map((c) => ({
     ...c,
-    weight: 3 + c.list.length + (c.leaders.length > 3 ? 1 : 0),
+    weight: 3 + c.list.length + (c.guests ? c.guests.length : 0) + (c.leaders.length > 3 ? 1 : 0),
   }));
 
   const render = (card) => (

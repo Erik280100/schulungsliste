@@ -51,13 +51,17 @@ export function buildCards(state) {
     const trainers = fkHere.filter((f) => f.thema === th && isTrainer(f));
     const guests = fkHere.filter((f) => f.thema === th && !isTrainer(f));
     const list = placed.filter((t) => t.thema === th);
-    if (trainers.length || list.length) {
-      if (state.split[th] && trainers.length > 1) {
+    const isSplit = Boolean(state.split[th]) && trainers.length > 1;
+    // Teilnehmende Führungskräfte stehen in derselben Karte wie die Trainees des Themas;
+    // nur bei aufgeteilten Themen bekommen sie eine eigene Karte.
+    if (trainers.length || list.length || (guests.length && !isSplit)) {
+      if (isSplit) {
         const parts = trainers.map((f, i) => ({
           kind: "trainees",
           thema: th,
           leaders: [f],
           list: [],
+          guests: [],
           fkId: f.id,
           teil: i + 1,
           raumKey: raumKey(th, f.id),
@@ -69,10 +73,10 @@ export function buildCards(state) {
         });
         cards.push(...parts);
       } else {
-        cards.push({ kind: "trainees", thema: th, leaders: trainers, list, raumKey: th });
+        cards.push({ kind: "trainees", thema: th, leaders: trainers, list, guests, raumKey: th });
       }
     }
-    if (guests.length) {
+    if (guests.length && isSplit) {
       cards.push({ kind: "fk", thema: th, leaders: trainers, list: guests, raumKey: fkRaumKey(th) });
     }
   });
