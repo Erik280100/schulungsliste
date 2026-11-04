@@ -257,3 +257,8 @@ summary { cursor: pointer; font-weight: 700; }
 .sync-ok { background: #e3f6ee; color: #0a6b4d; }
 .sync-fehler, .sync-offline, .sync-regeln { background: #fde7e7; color: #b42318; }
 @media print { .sync { display: none; } }
+
+/* Führungskraft/Kennzahl, die nach "Planung abschließen" noch offen ist */
+.stat.alert { background: var(--alertbg); border-color: var(--danger); }
+.stat.alert b { color: var(--danger); }
+.fk.alert { background: var(--alertbg); border-color: var(--danger); }

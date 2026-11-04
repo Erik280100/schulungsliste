@@ -1,6 +1,6 @@
 import { Avatar, ThemaSelect, colorOf } from "./common.jsx";
 
-export default function LeaderBar({ state, dispatch }) {
+export default function LeaderBar({ state, dispatch, checked }) {
   const sorted = [...state.fks].sort((a, b) => (a.status === "fehlt") - (b.status === "fehlt"));
   return (
     <div className="fk-bar">
@@ -9,7 +9,7 @@ export default function LeaderBar({ state, dispatch }) {
         return (
           <div
             key={f.id}
-            className={"fk" + (off ? " off" : "") + (f.thema && f.rolle === "teilnehmer" ? " teil" : "")}
+            className={"fk" + (off ? " off" : "") + (f.thema && f.rolle === "teilnehmer" ? " teil" : "") + (checked && !off && !f.thema ? " alert" : "")}
             style={{ "--c": f.thema ? colorOf(state.themen, f.thema) : "var(--line)" }}
           >
             <div className="fk-head">

@@ -40,6 +40,9 @@ export const unledTrainees = (state) => {
   return state.trainees.filter((t) => t.status === "anwesend" && t.thema && !led.has(t.thema));
 };
 
+// Anwesende Führungskräfte, die noch kein Thema haben
+export const unassignedFks = (state) => state.fks.filter((f) => f.status === "anwesend" && !f.thema);
+
 // Alle Karten der Ergebnis-Ansicht (auch Grundlage für den Excel-Export):
 // pro Thema eine Karte, bei aufgeteilten Themen je Trainer eine Teilgruppe,
 // plus eine eigene Karte (eigener Raum), wenn Führungskräfte am Thema teilnehmen.

@@ -8,7 +8,7 @@ import TopicCards from "./components/TopicCards.jsx";
 import TraineeGroups from "./components/TraineeGroups.jsx";
 import { Absent, Unassigned } from "./components/Pools.jsx";
 import Stammdaten from "./components/Stammdaten.jsx";
-import { unledTrainees } from "./components/common.jsx";
+import { unassignedFks, unledTrainees } from "./components/common.jsx";
 
 export default function App() {
   const [state, dispatch] = useReducer(reducer, undefined, loadState);
@@ -60,6 +60,8 @@ export default function App() {
   }, [state, cloudReady]);
   const [checked, setChecked] = useState(false); // erst nach "Planung abschließen" prüfen
   const unled = unledTrainees(state);
+  const fkOpen = unassignedFks(state);
+  const problem = unled.length > 0 || fkOpen.length > 0;
 
   return (
     <main>
@@ -67,16 +69,27 @@ export default function App() {
         {{ lokal: "Nur lokal gespeichert", laden: "Lade gemeinsamen Stand …", speichern: "Speichere …", ok: "Gemeinsam gespeichert", fehler: "Speichern fehlgeschlagen", offline: "Keine Verbindung zu Firestore (Datenbank angelegt? Netz/Adblocker?)", regeln: "Zugriff verweigert – Firestore-Regeln prüfen" }[sync]}
       </div>
       {checked && (
-        <div className={unled.length ? "attention" : "attention ok"} role="alert">
+        <div className={problem ? "attention" : "attention ok"} role="alert">
           <span>
-            {unled.length ? (
+            {problem ? (
               <>
-                <b>Achtung:</b> Nicht alle Trainees sind zugeteilt – für ihr Thema ist keine Führungskraft
-                eingeteilt: {unled.map((t) => `${t.name} (${t.thema})`).join(", ")}
+                {fkOpen.length > 0 && (
+                  <div>
+                    <b>Achtung:</b> {fkOpen.length} {fkOpen.length === 1 ? "Führungskraft hat" : "Führungskräfte haben"}{" "}
+                    noch kein Thema: {fkOpen.map((f) => f.name).join(", ")}
+                  </div>
+                )}
+                {unled.length > 0 && (
+                  <div>
+                    <b>Achtung:</b> Nicht alle Trainees sind zugeteilt – für ihr Thema ist keine Führungskraft
+                    eingeteilt: {unled.map((t) => `${t.name} (${t.thema})`).join(", ")}
+                  </div>
+                )}
               </>
             ) : (
               <>
-                <b>Alles in Ordnung:</b> Jedes Thema mit Trainees hat eine Führungskraft.
+                <b>Alles in Ordnung:</b> Alle Führungskräfte haben ein Thema, und jedes Thema mit Trainees hat eine
+                Führungskraft.
               </>
             )}
           </span>
@@ -85,10 +98,10 @@ export default function App() {
           </button>
         </div>
       )}
-      <Header state={state} dispatch={dispatch} onFinish={() => setChecked(true)} />
+      <Header state={state} dispatch={dispatch} onFinish={() => setChecked(true)} checked={checked} />
 
       <h2>1 · Führungskräfte: Thema zuteilen</h2>
-      <LeaderBar state={state} dispatch={dispatch} />
+      <LeaderBar state={state} dispatch={dispatch} checked={checked} />
 
       <h2>2 · Trainees: Thema zuteilen</h2>
       <TraineeGroups state={state} dispatch={dispatch} checked={checked} />

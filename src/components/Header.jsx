@@ -2,15 +2,16 @@ import { useRef, useState } from "react";
 import ConfirmDialog from "./ConfirmDialog.jsx";
 import { exportExcel } from "../exportExcel.js";
 import { normalize } from "../data.js";
-import { valueOf } from "./common.jsx";
+import { unassignedFks, valueOf } from "./common.jsx";
 
-export default function Header({ state, dispatch, onFinish }) {
+export default function Header({ state, dispatch, onFinish, checked }) {
   const fileRef = useRef(null);
   const [askReset, setAskReset] = useState(false);
   const notDone = state.trainees.filter((t) => t.status === "anwesend" && valueOf(t, false) === "Nicht bearbeitet");
   const here = state.trainees.filter((t) => t.status === "anwesend" && !notDone.includes(t));
   const placed = here.filter((t) => t.thema);
   const fkHere = state.fks.filter((f) => f.status === "anwesend");
+  const fkOpen = unassignedFks(state);
 
   const stats = [
     [`${here.length}/${state.trainees.length}`, "Trainees anwesend"],
@@ -19,6 +20,7 @@ export default function Header({ state, dispatch, onFinish }) {
     [placed.length, "eingeteilt"],
     [here.length - placed.length, "ohne Thema"],
     [`${fkHere.length}/${state.fks.length}`, "Führungskräfte da"],
+    [fkOpen.length, "Trainer ohne Thema", fkOpen.length > 0 && checked],
   ];
 
   const exportJson = () => {
@@ -48,8 +50,8 @@ export default function Header({ state, dispatch, onFinish }) {
     <header className="top">
       <h1>Schulungs-Einteilung</h1>
       <div className="stats">
-        {stats.map(([n, l]) => (
-          <div className="stat" key={l}>
+        {stats.map(([n, l, red]) => (
+          <div className={"stat" + (red ? " alert" : "")} key={l}>
             <b>{n}</b>
             <span>{l}</span>
           </div>
