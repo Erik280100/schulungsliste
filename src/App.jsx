@@ -1,5 +1,6 @@
-import { useEffect, useReducer, useState } from "react";
-import { loadState, saveState } from "./data.js";
+import { useEffect, useReducer, useRef, useState } from "react";
+import { loadState, normalize, saveState } from "./data.js";
+import { cloudEnabled, saveCloud, subscribeCloud } from "./cloud.js";
 import { reducer } from "./reducer.js";
 import Header from "./components/Header.jsx";
 import LeaderBar from "./components/LeaderBar.jsx";
@@ -11,12 +12,47 @@ import { unledTrainees } from "./components/common.jsx";
 
 export default function App() {
   const [state, dispatch] = useReducer(reducer, undefined, loadState);
-  useEffect(() => saveState(state), [state]);
+  useEffect(() => saveState(state), [state]); // lokaler Cache
+
+  // Gemeinsamer Stand über Firestore: Änderungen anderer erscheinen live, eigene werden gespeichert
+  const remoteJson = useRef(null);
+  const [cloudReady, setCloudReady] = useState(!cloudEnabled);
+  const [sync, setSync] = useState(cloudEnabled ? "laden" : "lokal");
+  useEffect(() => {
+    if (!cloudEnabled) return undefined;
+    return subscribeCloud(
+      (json, pending) => {
+        remoteJson.current = json;
+        if (json !== null && !pending) dispatch({ type: "replace", state: normalize(JSON.parse(json)) });
+        setCloudReady(true);
+        setSync("ok");
+      },
+      () => setSync("fehler"),
+    );
+  }, []);
+  useEffect(() => {
+    if (!cloudEnabled || !cloudReady) return undefined;
+    const json = JSON.stringify(state);
+    if (json === remoteJson.current) return undefined;
+    const t = setTimeout(() => {
+      setSync("speichern");
+      saveCloud(json)
+        .then(() => {
+          remoteJson.current = json;
+          setSync("ok");
+        })
+        .catch(() => setSync("fehler"));
+    }, 400);
+    return () => clearTimeout(t);
+  }, [state, cloudReady]);
   const [checked, setChecked] = useState(false); // erst nach "Planung abschließen" prüfen
   const unled = unledTrainees(state);
 
   return (
     <main>
+      <div className={`sync sync-${sync}`} title="Speicherstatus">
+        {{ lokal: "Nur lokal gespeichert", laden: "Lade gemeinsamen Stand …", speichern: "Speichere …", ok: "Gemeinsam gespeichert", fehler: "Speichern fehlgeschlagen" }[sync]}
+      </div>
       {checked && (
         <div className={unled.length ? "attention" : "attention ok"} role="alert">
           <span>
