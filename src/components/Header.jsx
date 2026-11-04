@@ -2,16 +2,19 @@ import { useRef, useState } from "react";
 import ConfirmDialog from "./ConfirmDialog.jsx";
 import { exportExcel } from "../exportExcel.js";
 import { normalize } from "../data.js";
+import { valueOf } from "./common.jsx";
 
 export default function Header({ state, dispatch, onFinish }) {
   const fileRef = useRef(null);
   const [askReset, setAskReset] = useState(false);
-  const here = state.trainees.filter((t) => t.status === "anwesend");
+  const notDone = state.trainees.filter((t) => t.status === "anwesend" && valueOf(t, false) === "Nicht bearbeitet");
+  const here = state.trainees.filter((t) => t.status === "anwesend" && !notDone.includes(t));
   const placed = here.filter((t) => t.thema);
   const fkHere = state.fks.filter((f) => f.status === "anwesend");
 
   const stats = [
     [state.trainees.length, "Trainees gesamt"],
+    [notDone.length, "nicht bearbeitet"],
     [here.length, "anwesend"],
     [placed.length, "eingeteilt"],
     [here.length - placed.length, "ohne Thema"],
