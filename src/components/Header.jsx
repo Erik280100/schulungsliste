@@ -16,6 +16,7 @@ export default function Header({ state, dispatch, onFinish }) {
     [state.trainees.length, "Trainees gesamt"],
     [notDone.length, "nicht bearbeitet"],
     [here.length, "anwesend"],
+    [state.trainees.filter((t) => t.status === "fehlt").length, "fehlt"],
     [placed.length, "eingeteilt"],
     [here.length - placed.length, "ohne Thema"],
     [`${fkHere.length}/${state.fks.length}`, "Führungskräfte da"],
