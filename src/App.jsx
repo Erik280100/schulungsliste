@@ -20,15 +20,28 @@ export default function App() {
   const [sync, setSync] = useState(cloudEnabled ? "laden" : "lokal");
   useEffect(() => {
     if (!cloudEnabled) return undefined;
-    return subscribeCloud(
-      (json, pending) => {
+    // Kommt nach 8 s keine Antwort vom Server, ist meist die Datenbank nicht angelegt oder blockiert
+    const timer = setTimeout(() => setSync((s) => (s === "laden" ? "offline" : s)), 8000);
+    const unsub = subscribeCloud(
+      (json, { pending, fromCache }) => {
+        // Antwort nur aus dem Cache (Server nicht erreicht) nicht als "leer" werten
+        if (fromCache && json === null) return;
+        clearTimeout(timer);
         remoteJson.current = json;
         if (json !== null && !pending) dispatch({ type: "replace", state: normalize(JSON.parse(json)) });
         setCloudReady(true);
         setSync("ok");
       },
-      () => setSync("fehler"),
+      (err) => {
+        clearTimeout(timer);
+        console.error("Firestore:", err);
+        setSync(err.code === "permission-denied" ? "regeln" : "fehler");
+      },
     );
+    return () => {
+      clearTimeout(timer);
+      unsub();
+    };
   }, []);
   useEffect(() => {
     if (!cloudEnabled || !cloudReady) return undefined;
@@ -51,7 +64,7 @@ export default function App() {
   return (
     <main>
       <div className={`sync sync-${sync}`} title="Speicherstatus">
-        {{ lokal: "Nur lokal gespeichert", laden: "Lade gemeinsamen Stand …", speichern: "Speichere …", ok: "Gemeinsam gespeichert", fehler: "Speichern fehlgeschlagen" }[sync]}
+        {{ lokal: "Nur lokal gespeichert", laden: "Lade gemeinsamen Stand …", speichern: "Speichere …", ok: "Gemeinsam gespeichert", fehler: "Speichern fehlgeschlagen", offline: "Keine Verbindung zu Firestore (Datenbank angelegt? Netz/Adblocker?)", regeln: "Zugriff verweigert – Firestore-Regeln prüfen" }[sync]}
       </div>
       {checked && (
         <div className={unled.length ? "attention" : "attention ok"} role="alert">

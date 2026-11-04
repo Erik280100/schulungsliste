@@ -1,5 +1,5 @@
 import { initializeApp } from "firebase/app";
-import { doc, getFirestore, onSnapshot, setDoc } from "firebase/firestore";
+import { doc, initializeFirestore, onSnapshot, setDoc } from "firebase/firestore";
 import { firebaseConfig } from "./firebaseConfig.js";
 
 // Gemeinsamer Stand: ein Firestore-Dokument, der ganze State als JSON-String
@@ -8,15 +8,21 @@ export const cloudEnabled = Boolean(firebaseConfig.apiKey && firebaseConfig.proj
 
 let ref = null;
 if (cloudEnabled) {
-  ref = doc(getFirestore(initializeApp(firebaseConfig)), "schulung", "state");
+  // Long-Polling-Autoerkennung: funktioniert auch hinter Proxys/Firewalls, die WebChannel-Streams blockieren
+  const db = initializeFirestore(initializeApp(firebaseConfig), { experimentalAutoDetectLongPolling: true });
+  ref = doc(db, "schulung", "state");
 }
 
-// callback(jsonString | null, fromLocalWrite) – null = Dokument existiert noch nicht
+// callback(jsonString | null, { pending, fromCache }) – null = Dokument existiert noch nicht
 export function subscribeCloud(callback, onError) {
   if (!ref) return () => {};
   return onSnapshot(
     ref,
-    (snap) => callback(snap.exists() ? snap.data().json : null, snap.metadata.hasPendingWrites),
+    (snap) =>
+      callback(snap.exists() ? snap.data().json : null, {
+        pending: snap.metadata.hasPendingWrites,
+        fromCache: snap.metadata.fromCache,
+      }),
     onError,
   );
 }
