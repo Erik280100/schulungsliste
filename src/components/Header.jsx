@@ -13,9 +13,8 @@ export default function Header({ state, dispatch, onFinish }) {
   const fkHere = state.fks.filter((f) => f.status === "anwesend");
 
   const stats = [
-    [state.trainees.length, "Trainees gesamt"],
+    [`${here.length}/${state.trainees.length}`, "Trainees anwesend"],
     [notDone.length, "nicht bearbeitet"],
-    [here.length, "anwesend"],
     [state.trainees.filter((t) => t.status === "fehlt").length, "fehlt"],
     [placed.length, "eingeteilt"],
     [here.length - placed.length, "ohne Thema"],
